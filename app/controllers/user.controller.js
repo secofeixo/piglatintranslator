@@ -1,6 +1,10 @@
 
 const logger = require('./log.controller.js'),
-  Sentence = require('../models/sentence');
+  Sentence = require('../models/sentence'),
+  configToken = require('../../config/token.js'),
+  User = require('../models/user'),
+  moment = require('moment'),
+  jwt = require('jwt-simple');
 
 function getProfile(req, res) {
 
@@ -21,6 +25,33 @@ function getProfile(req, res) {
   });
 } // getProfile
 
+function verifyProfile(req, res) {
+  const token = req.query.token;
+  var payload = jwt.decode(token, configToken.tokenSecret);
+  logger.debug(`user.controller.js. verifyProfile. token: ${token}`);
+  logger.debug(`user.controller.js. verifyProfile. payload: ${payload}`);
+  
+  if(payload.exp <= moment().unix()) {
+     return res
+      .status(401)
+        .send({message: "El token ha expirado"});
+  }
+  
+  req.user = payload.sub;
+  logger.debug(`user.controller.js. verifyProfile. payload: ${req.user}`);
+
+  User.update({'_id': req.user},{'$set': {'verified': true}}).exec((err) => {
+    if (err) {
+      logger.error(`user.controller.js. verifyProfile. Error updating user validating email. ${sError}`);
+    }
+
+    res.redirect('/profile');
+  })
+
+
+}
+
 module.exports = {
   getProfile,
+  verifyProfile,
 };

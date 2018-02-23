@@ -3,14 +3,13 @@
 // load all the things we need
 var LocalStrategy = require('passport-local').Strategy;
 const User = require('../app/models/user'),
-    logger = require('../app/controllers/log.controller.js');
+    logger = require('../app/controllers/log.controller'),
+    ctrlEmail = require('../app/controllers/email.controller'),
+    ctrlToken = require('../app/controllers/token.controller')
 
 // expose this function to our app using module.exports
 module.exports = function(passport) {
 
-	// =========================================================================
-    // passport session setup ==================================================
-    // =========================================================================
     // required for persistent login sessions
     // passport needs ability to serialize and unserialize users out of session
 
@@ -58,11 +57,16 @@ module.exports = function(passport) {
                 // set the user's local credentials
                 newUser.email    = email;
                 newUser.password = newUser.generateHash(password); // use the generateHash function in our user model
+                newUser.verified = false;
 
 				// save the user
                 newUser.save((err) =>{
                     if (err)
                         throw err;
+
+                    const token = ctrlToken.createToken(newUser);
+                    ctrlEmail.sendEmailValidateEmail(newUser, token);
+
                     return done(null, newUser);
                 });
             }

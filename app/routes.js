@@ -36,14 +36,24 @@ module.exports = function(app, passport) {
 
 	// process the signup form
 	app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/profile', // redirect to the secure profile section
+		successRedirect : '/verify', // redirect to the secure profile section
 		failureRedirect : '/signup', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
 
+	app.get('/verify', (req, res) => {
+	  const user = req.user;
+
+		res.render('verify.ejs', { message: req.flash('verifyMessage') , email: user.email});
+	})
+
 	// *************************************
 	// PROFILE/TRANSLATE
 	// *************************************
+	
+	// verify the profile
+	app.get('/verifyProfile', ctrlUser.verifyProfile)
+
 	// protected in order to be logged in
 	app.get('/profile', isLoggedIn, ctrlUser.getProfile);
 
@@ -62,7 +72,9 @@ module.exports = function(app, passport) {
 function isLoggedIn(req, res, next) {
 	// if user is authenticated in the session, carry on
 	if (req.isAuthenticated())
-		return next();
+		if (req.user.verified) {
+			return next();
+		}
 	// if they aren't redirect them to the home page
 	res.redirect('/');
 }

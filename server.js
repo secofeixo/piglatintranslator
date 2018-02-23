@@ -2,27 +2,25 @@
 
 // set up ======================================================================
 // get all the tools we need
-var express = require('express');
-var app = express();
-var port = process.env.PORT || 8080;
-var mongoose = require('./config/mongoose');
-var passport = require('passport');
-var flash = require('connect-flash');
-var session = require('express-session');
-var SessionMongoStore = require('connect-mongo')(session);
-var helmet = require('helmet');
-var bodyParser = require('body-parser');
-var compression = require('compression');
-var methodOverride = require('method-override');
-var path = require('path');
-
-var configDB = require('./config/database.js');
-var logger = require('./app/controllers/log.controller.js');
+const express = require('express'),
+	app = express(),
+	port = process.env.PORT || 8080,
+	mongoose = require('./config/mongoose'),
+	passport = require('passport'),
+	flash = require('connect-flash'),
+	session = require('express-session'),
+	SessionMongoStore = require('connect-mongo')(session),
+	helmet = require('helmet'),
+	bodyParser = require('body-parser'),
+	compression = require('compression'),
+	methodOverride = require('method-override'),
+	path = require('path'),
+	configDB = require('./config/database.js'),
+	logger = require('./app/controllers/log.controller.js');
 
 // configuration ===============================================================
 
 const oneDay = 1000 * 60 * 60 * 24;
-
 const sessionOptions = {
   secret: 'ultrasecrettoken',
   name: 'sessionId',
