@@ -1,0 +1,74 @@
+<!-- views/profile.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Node Authentication</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<style>
+		body 		{ padding-top:80px; word-wrap:break-word; }
+	</style>
+</head>
+<body>
+<div class="container">
+
+	<div class="page-header text-center">
+		<h1><span class="fa fa-anchor"></span> Profile Page</h1>
+		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+	</div>
+
+	<div class="row">
+
+		<!-- LOCAL INFORMATION -->
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="well">
+					<h3><span class="fa fa-user"></span> Local</h3>
+
+						<p>
+							<strong>id</strong>: <%= user._id %><br>
+							<strong>email</strong>: <%= user.email %><br>
+						</p>
+
+				</div>
+			</div>
+
+			<div class="col-sm-6">
+				<div class="well">
+					<h3><span class="fa fa-user"></span> Translate</h3>
+						<form action="/translate" method="post" id="translate">
+						  <div class="form-group">
+						    <label for="textarea1">Introduce text to translate</label>
+						    <textarea class="form-control" id="textarea1" rows="3" name="textEnglish">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum						    	
+						    </textarea>
+						  </div>
+							<button type="submit" class="btn btn-warning btn-lg">Translate</button>
+						</form>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+				<div class="well">
+					<h3><span class="fa fa-align-justify"></span> List of sentences</h3>
+						<div class="form-group">
+							<ul class="list-group">
+								<% sentences.forEach(function(sentence){ %>
+									<li class="list-group-item">
+											<strong>English:</strong>
+	    							  <%= sentence.english %><br>
+	    							  <br>
+											<strong>Pig Latin:</strong>
+											<%= sentence.piglatin %>
+    							</li>
+  							<% }); %>
+							</ul>
+						</div>
+				</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
