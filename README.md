@@ -12,5 +12,5 @@ Code creating a pig latin translator webpage developed in NodeJS
 
 # TODO Tasks
  - Create the API REST sending not a webpage, but a JSON document
- - Redo teh front-end using Angular, Vuew, Rect, jQuery, ...
+ - Redo the front-end using Angular, Vuew, Rect, jQuery, ...
  - Develop the tests
