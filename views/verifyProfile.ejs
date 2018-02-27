@@ -1,0 +1,64 @@
+<!-- views/verifyProfile.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Signup</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+	<base href="/">
+</head>
+<body>
+<div ng-app="verifyApp" ng-controller="ctrlVerify as ctrl">
+	<div class="container">
+
+	<div class="col-sm-6 col-sm-offset-3">
+
+		<h1><span class="fa fa-sign-in"></span> Verifying email</h1>
+
+		<!-- show any messages that come back with authentication -->
+		<div class="alert alert-danger" ng-show="message !== undefined">{{ message }}</div>
+
+		<hr>
+
+		<p>Already have an account? <a href="/login">Login</a></p>
+		<p>Or go <a href="/">home</a>.</p>
+
+	</div>
+	</div>
+
+</div>
+</body>
+<script>
+var app = angular.module('verifyApp', []);
+
+
+app.controller('ctrlVerify', function($scope, $http, $window, $location) {
+		$scope.message = undefined;
+		url = "http://localhost:8080/";
+
+		const queryParams = $location.search().token;
+
+		console.log(`location ${JSON.stringify(queryParams)}`);
+    var sQuerySignup = url+"api/verifyProfile?token="+queryParams;
+    $http.get(sQuerySignup).
+			then(response => {
+				// this callback will be called asynchronously
+				// when the response is available
+				console.log("Verify process SUCCESS!!! ");
+				$window.location.href=url+'profile';
+			}, responseError =>{
+				// called asynchronously if an error occurs
+				// or server returns response with an error status.
+				$scope.message = `Verify error. ${JSON.stringify(responseError.data.msg)}`;
+			});
+});
+
+app.config(['$locationProvider', function($locationProvider){
+    $locationProvider.html5Mode(true);    
+}]);
+</script>
+</html>

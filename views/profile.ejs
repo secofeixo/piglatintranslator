@@ -3,6 +3,7 @@
 <html>
 <head>
 	<title>Pig Latin Translator</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
 	<style>
@@ -10,67 +11,146 @@
 	</style>
 </head>
 <body>
-<div class="container">
+	<div ng-app="profileApp" ng-controller="ctrlProfile as ctrl">
+		<md-content>
+			<div class="container">
 
-	<div class="page-header text-center">
-		<h1><span class="fa fa-anchor"></span>Pig Latin Translator</h1>
-		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
-	</div>
-
-	<div class="row">
-
-		<!-- LOCAL INFORMATION -->
-		<div class="row">
-			<div class="col-sm-">
-				<div class="well">
-					<h3><span class="fa fa-user"></span> Local</h3>
-
-						<p>
-							<strong>id</strong>: <%= user._id %><br>
-							<strong>email</strong>: <%= user.email %><br>
-						</p>
-
+				<div class="page-header text-center">
+					<h1><span class="fa fa-anchor"></span>Pig Latin Translator</h1>
+	        <md-button ng-click="logoutBtn()" class="btn btn-warning btn-lg">
+	          Logout
+	        </md-button>
 				</div>
-			</div>
-		</div>
+	
+				<div class="alert alert-danger" ng-show="message !== undefined">{{ message }}</div>
 
-		<!-- TRANSLATOR -->
-		<div class="row">
-			<div class="col-sm">
-				<div class="well">
-					<h3><span class="fa fa-user"></span> Translate</h3>
-						<form action="/translate" method="post" id="translate">
-						  <div class="form-group">
-						    <label for="textarea1">Introduce text to translate</label>
-						    <textarea class="form-control" id="textarea1" rows="3" name="textEnglish">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</textarea>
-						  </div>
-							<button type="submit" class="btn btn-warning btn-lg">Translate</button>
-						</form>
+				<div class="row">
 
-				</div>
-			</div>
-		</div>
+					<!-- LOCAL INFORMATION -->
+					<div class="row">
+						<div class="col-sm-">
+							<div class="well">
+								<h3><span class="fa fa-user"></span> Local</h3>
 
-		<div class="row">
-				<div class="well">
-					<h3><span class="fa fa-align-justify"></span> List of sentences</h3>
-						<div class="form-group">
-							<ul class="list-group">
-								<% sentences.forEach(function(sentence){ %>
-									<li class="list-group-item">
-											<strong>English:</strong>
-	    							  <%= sentence.english %><br>
-	    							  <br>
-											<strong>Pig Latin:</strong>
-											<%= sentence.piglatin %>
-    							</li>
-  							<% }); %>
-							</ul>
+									<p>
+										<strong>id</strong>: {{user._id}}<br>
+										<strong>email</strong>: {{user.email}}<br>
+									</p>
+
+							</div>
 						</div>
+					</div>
+
+					<!-- TRANSLATOR -->
+					<div class="row">
+						<div class="col-sm">
+							<div class="well">
+								<h3><span class="fa fa-user"></span> Translate</h3>
+									<form id="translate">
+									  <div class="form-group">
+									    <label for="textarea1">Introduce text to translate</label>
+									    <textarea class="form-control" id="textarea1" rows="3" name="textEnglish" ng-model="textEnglish"></textarea>
+									  </div>
+						        <md-button ng-click="translate()" class="btn btn-warning btn-lg">
+						          Translate
+						        </md-button>
+									</form>
+
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+							<div class="well">
+								<h3><span class="fa fa-align-justify"></span> List of sentences</h3>
+									<div class="form-group">
+										<ul class="list-group">
+											<li class="list-group-item" ng-repeat="sentence in sentences">
+													<strong>English:</strong>
+			    							  {{sentence.english}}<br>
+			    							  <br>
+													<strong>Pig Latin:</strong>
+													{{sentence.piglatin}}
+		    							</li>
+										</ul>
+									</div>
+							</div>
+					</div>
 				</div>
-		</div>
-	</div>
+			</div>
+	</md-content>
 </div>
 </body>
+<script>
+var app = angular.module('profileApp', []);
+
+
+app.controller('ctrlProfile', function($scope, $http, $window) {
+		url = "http://localhost:8080/";
+		$scope.textEnglish = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum';
+		$scope.user = undefined;
+		$scope.sentences = [];
+    $scope.loadData = function () {
+    	console.log('Loading profile');
+  		$scope.message = undefined;
+      var sQueryLogin = url+'api/profileuser';
+      $http.get(sQueryLogin).
+				then(response => {
+					// this callback will be called asynchronously
+					// when the response is available
+					$scope.user = response.data.user;
+					$scope.sentences = response.data.sentences;
+				}, responseError =>{
+					// called asynchronously if an error occurs
+					// or server returns response with an error status.
+					$scope.message = `Error reading profile. ${JSON.stringify(responseError.data.msg)}`;
+				});
+    }
+
+    $scope.logoutBtn = function () {
+    	console.log('logout');
+  		$scope.message = undefined;
+      var sQueryLogout = url+'api/logout';
+      $http.get(sQueryLogout).
+				then(response => {
+					// this callback will be called asynchronously
+					// when the response is available
+					console.log('Logout');
+					$window.location.href=url;
+				}, responseError =>{
+					// called asynchronously if an error occurs
+					// or server returns response with an error status.
+					$scope.message = `Logout error. ${JSON.stringify(responseError.data.msg)}`;
+				});
+    }
+
+    $scope.translate = function () {
+        var sQueryTranslate = url+"api/translate";
+        if ($scope.textEnglish === undefined) {
+					$scope.message = `Write a sentence to translate`;
+        	return;
+        }
+        const sText = $scope.textEnglish.trim();
+        if (sText === '') {
+					$scope.message = `Write a sentence to translate`;
+        	return;
+        }
+        $scope.message = undefined;
+        $http.post(sQueryTranslate, {textEnglish:sText}).
+					then(response => {
+						// this callback will be called asynchronously
+						// when the response is available
+						console.log(`Translate: ${JSON.stringify(response.data)}`);
+						$scope.sentences.splice(0, 0, response.data);
+					}, responseError =>{
+						// called asynchronously if an error occurs
+						// or server returns response with an error status.
+						$scope.message = `Translate error. ${JSON.stringify(responseError.data.msg)}`;
+					});
+    }
+
+		$scope.loadData();
+});
+</script>
+
 </html>

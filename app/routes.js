@@ -1,6 +1,7 @@
 // app/routes.js
 const ctrlPigLatinTranslator = require('./controllers/piglatin.controller.js'),
-	ctrlUser = require('./controllers/user.controller');
+	ctrlUser = require('./controllers/user.controller'),
+	ctrlLogin = require('./controllers/login.controller');
 
 module.exports = function(app, passport) {
 
@@ -20,11 +21,11 @@ module.exports = function(app, passport) {
 	});
 
 	// process the login form
-	app.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/profile', // redirect to the secure profile section
-		failureRedirect : '/login', // redirect back to the signup page if there is an error
-		failureFlash : true // allow flash messages
-	}));
+	app.post('/api/login', (req, res, next) => {
+		passport.authenticate('local-login', (err, user, info) => {
+			ctrlLogin.login(req, res, err, user, info);
+		})(req, res, next);
+	});
 
 	// *************************************
 	// SIGNUP
@@ -35,15 +36,14 @@ module.exports = function(app, passport) {
 	});
 
 	// process the signup form
-	app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/verify', // redirect to the secure profile section
-		failureRedirect : '/signup', // redirect back to the signup page if there is an error
-		failureFlash : true // allow flash messages
-	}));
+	app.post('/api/signup', (req, res, next) => {
+		passport.authenticate('local-signup', (err, user, info) => {
+			ctrlLogin.signup(req, res, err, user, info);
+		})(req, res, next);
+	});
 
-	app.get('/verify', (req, res) => {
+	app.get('/verifyemail', (req, res) => {
 	  const user = req.user;
-
 		res.render('verify.ejs', { message: req.flash('verifyMessage') , email: user.email});
 	})
 
@@ -52,29 +52,36 @@ module.exports = function(app, passport) {
 	// *************************************
 	
 	// verify the profile
-	app.get('/verifyProfile', ctrlUser.verifyProfile)
+	app.get('/verifyProfile', (req, res) => {
+		res.render('verifyProfile.ejs');
+	})
 
-	// protected in order to be logged in
-	app.get('/profile', isLoggedIn, ctrlUser.getProfile);
+	app.get('/api/verifyProfile', ctrlUser.verifyProfile)
 
-	app.post('/translate', isLoggedIn, ctrlPigLatinTranslator.translateAndSave);
+// protected in order to be logged in
+	app.get('/profile', isLoggedIn, (req, res) => {
+		res.render('profile.ejs');
+	});
+// protected in order to be logged in
+	app.get('/api/profileuser', isLoggedIn, ctrlUser.getProfile);
+
+	app.post('/api/translate', isLoggedIn, ctrlPigLatinTranslator.translateAndSave);
 
 	// *************************************
 	// LOGOUT
 	// *************************************
-	app.get('/logout', function(req, res) {
-		req.logout();
-		res.redirect('/');
-	});
+	app.get('/api/logout', ctrlLogin.logout);
 };
 
 // route middleware to make sure
 function isLoggedIn(req, res, next) {
 	// if user is authenticated in the session, carry on
-	if (req.isAuthenticated())
+	if (req.isAuthenticated()) {
 		if (req.user.verified) {
 			return next();
 		}
+	}
 	// if they aren't redirect them to the home page
+	// res.status(401).json({msg: 'User not login in'});
 	res.redirect('/');
 }

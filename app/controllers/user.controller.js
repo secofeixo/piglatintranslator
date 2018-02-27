@@ -18,7 +18,7 @@ function getProfile(req, res) {
       logger.error(`user.controller.js. getProfile. ${sError}`);
     }
 
-    res.render('profile.ejs', {
+    res.status(200).json({
       user : req.user, // get the user out of session and pass to template
       sentences: arSentences,
     });
@@ -27,6 +27,10 @@ function getProfile(req, res) {
 
 function verifyProfile(req, res) {
   const token = req.query.token;
+  if (!token) {
+    res.status(400).json({msg: "token not set"});
+    return;
+  }
   var payload = jwt.decode(token, configToken.tokenSecret);
   logger.debug(`user.controller.js. verifyProfile. token: ${token}`);
   logger.debug(`user.controller.js. verifyProfile. payload: ${payload}`);
@@ -34,7 +38,7 @@ function verifyProfile(req, res) {
   if(payload.exp <= moment().unix()) {
      return res
       .status(401)
-        .send({message: "El token ha expirado"});
+        .send({message: "token has expired"});
   }
   
   req.user = payload.sub;
@@ -43,9 +47,11 @@ function verifyProfile(req, res) {
   User.update({'_id': req.user},{'$set': {'verified': true}}).exec((err) => {
     if (err) {
       logger.error(`user.controller.js. verifyProfile. Error updating user validating email. ${sError}`);
+      res.sttaus(500).json({msg: 'Internal Error'});
+      return;
     }
 
-    res.redirect('/profile');
+    res.status(200).json({msg: 'Account verified'});
   })
 
 

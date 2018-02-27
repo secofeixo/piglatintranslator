@@ -159,9 +159,11 @@ function translateAndSave(req, res) {
    newSentence.save(function(err) {
       if (err) {
          logger.info(`Error saving sentence: ${err}`);
+         res.status(500).json({msg: 'Error saving sentence'});
+         return;
       }
 
-      res.redirect('/profile');
+      res.status(200).json(newSentence);
    });
 
 } // translateAndSave

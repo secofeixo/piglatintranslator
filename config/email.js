@@ -1,4 +1,4 @@
 module.exports = {
-  account: 'user@fromgoogle.com',
+  account: 'you@google.account',
   pwd: 'yoursupersecretpassword',
 };
